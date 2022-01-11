@@ -280,7 +280,8 @@ const App: React.FC<{}> = () => {
               day: day.toString(),
             }
         )
-        .toArray(),
+        .toArray()
+        .slice(200, 240),
     [exisitDays, dataset]
   );
 
@@ -387,8 +388,8 @@ const App: React.FC<{}> = () => {
 
     return (
       <BarChart
-        height={1440}
-        width={810}
+        height={840}
+        width={1410}
         data={datasetWithBackfill}
         layout="vertical"
       >
