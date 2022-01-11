@@ -55,7 +55,7 @@ const App: React.FC<{}> = () => {
   const selectedCenter =
     new URL(window.location.href).searchParams.get("center") ?? "LIN";
   const mode = new URL(window.location.href).searchParams.get("mode") ?? "data_center_year_code_day_serial";
-  const selectedFy = new URL(window.location.href).searchParams.get("fy");
+  const selectedFy = "21";
 
   const [selectedUpdateDay, setSelectedUpdateDay] = useState<string | null>(
     null
@@ -86,7 +86,7 @@ const App: React.FC<{}> = () => {
         setSearchParam("center", "LIN");
       }
       if (!url.searchParams.get("mode") && url.searchParams.get("form")) {
-        setSearchParam("mode", ["I-485", "I-140"].includes(url.searchParams.get("form")!) ? "data_center_year_code_day_serial" : "data_center_year_day_code_serial");
+        setSearchParam("mode", "data_center_year_day_code_serial");
       }
       if (url.searchParams.get("form") && url.searchParams.get("center") && url.searchParams.get("mode")) {
         if (url.searchParams.get("t_delta") === "7") {
@@ -94,14 +94,10 @@ const App: React.FC<{}> = () => {
         } else {
           setTransitioningData((await (await import('./scraper/transitioning_1.json')).default));
         }
-        if (mode === 'data_center_year_code_day_serial') {
-          setCaseData(((await import('./scraper/data_center_year_code_day_serial_' + selectedFy + '.json')).default));
-        } else {
-          setCaseData(((await import('./scraper/data_center_year_day_code_serial_' + selectedFy + '.json')).default));
-        }
+        setCaseData(((await import('./scraper/data_center_year_day_code_serial_21.json')).default));
       }
     })();
-  }, [mode, selectedFy, url.searchParams]);
+  }, [mode, url.searchParams]);
 
   const entries = useMemo(() => {
     return Immutable.List(
@@ -427,7 +423,7 @@ const App: React.FC<{}> = () => {
         ))}
       </BarChart>
     );
-  }, [datasetWithBackfill, maxBarHeight, exisitDays, existStatus, todayCount, previousDayCount, mode, selectedCenter, selectedFy]);
+  }, [datasetWithBackfill, maxBarHeight, exisitDays, existStatus, todayCount, previousDayCount, mode, selectedCenter]);
 
   const introduction = (
     <div>
