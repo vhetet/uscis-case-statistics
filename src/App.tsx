@@ -22,7 +22,6 @@ import Grid from "@material-ui/core/Grid";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import Slider from "@material-ui/core/Slider";
-import { transform } from "lodash";
 
 
 type FY = "20" | "21";
@@ -52,9 +51,9 @@ function getColor(s: string): string {
 
 const App: React.FC<{}> = () => {
   const selectedForm =
-    new URL(window.location.href).searchParams.get("form") ?? "I-129";
+    new URL(window.location.href).searchParams.get("form") ?? "I-765";
   const selectedCenter =
-    new URL(window.location.href).searchParams.get("center") ?? "WAC";
+    new URL(window.location.href).searchParams.get("center") ?? "LIN";
   const mode = new URL(window.location.href).searchParams.get("mode") ?? "data_center_year_code_day_serial";
   const selectedFy = new URL(window.location.href).searchParams.get("fy");
 
@@ -81,10 +80,10 @@ const App: React.FC<{}> = () => {
         setSearchParam("fy", "21");
       }
       if (!url.searchParams.get("form")) {
-        setSearchParam("form", "I-129");
+        setSearchParam("form", "I-131");
       }
       if (!url.searchParams.get("center")) {
-        setSearchParam("center", "WAC");
+        setSearchParam("center", "LIN");
       }
       if (!url.searchParams.get("mode") && url.searchParams.get("form")) {
         setSearchParam("mode", ["I-485", "I-140"].includes(url.searchParams.get("form")!) ? "data_center_year_code_day_serial" : "data_center_year_day_code_serial");
@@ -448,17 +447,6 @@ const App: React.FC<{}> = () => {
             : "Not Exist currently"}
         </strong>
       </p>
-      <h3>Help needed for UI and clawer</h3>
-      <p>
-        GitHub project:
-        <a
-          href="https://github.com/vicdus/uscis-case-statistics/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          https://github.com/vicdus/uscis-case-statistics/
-        </a>
-      </p>
     </div>
   );
 
@@ -490,7 +478,6 @@ const App: React.FC<{}> = () => {
 
   const formTypeSelector = (
     <FormControl fullWidth={true} component="fieldset">
-      <FormLabel component="legend">Form Type  <p style={{ color: 'red' }}><strong> (Note: Check 'unknown' type for card-mailed I-485/I-765 case 已发卡的I-485/I-765 会被归类为unknwon 由于发卡后无法从USCIS得知表格类型)   </strong></p>  </FormLabel>
       <RadioGroup
         aria-label="form"
         name="form"
@@ -514,28 +501,6 @@ const App: React.FC<{}> = () => {
   );
 
 
-  const modeSelector = (
-    <FormControl fullWidth={true} component="fieldset">
-      <FormLabel component="legend"><p style={{ color: 'red' }}><strong>Format of case number(Try both if your case number format looks different 如果case number格式看起来不对请尝试改变此选项)</strong></p> </FormLabel>
-      <RadioGroup
-        aria-label="form"
-        name="form"
-        value={mode}
-        onChange={(e) => setSearchParam("mode", e.target.value)}
-        row={true}
-      >
-        {['data_center_year_day_code_serial', 'data_center_year_code_day_serial']
-          .map((v, ind) => (
-            <FormControlLabel
-              key={ind}
-              value={v}
-              control={<Radio />}
-              label={v}
-            />
-          ))}
-      </RadioGroup>
-    </FormControl>
-  );
 
   const centerSelector = (
     <FormControl fullWidth={true} component="fieldset">
@@ -562,36 +527,12 @@ const App: React.FC<{}> = () => {
     </FormControl>
   );
 
-  const fySelector = (
-    <FormControl fullWidth={true} component="fieldset">
-      <FormLabel component="legend">Fiscal Year</FormLabel>
-      <RadioGroup
-        aria-label="fy"
-        name="fy"
-        value={selectedFy}
-        onChange={(e) => setSearchParam("fy", e.target.value)}
-        row={true}
-      >
-        {["21", "22"]
-          .map((f, ind) => (
-            <FormControlLabel
-              key={ind}
-              value={f}
-              control={<Radio />}
-              label={f}
-            />
-          ))}
-      </RadioGroup>
-    </FormControl>
-  );
 
   return (
     <div>
       {introduction}
-      {fySelector}
       {formTypeSelector}
       {centerSelector}
-      {modeSelector}
       {updateDayPicker}
       {barChart}
       {updateDayPicker}
