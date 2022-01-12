@@ -14,6 +14,7 @@ import {
   XAxis,
   YAxis,
   TooltipProps,
+  ResponsiveContainer,
 } from "recharts";
 import FormControl from "@material-ui/core/FormControl";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
@@ -382,46 +383,46 @@ const App: React.FC<{}> = () => {
     };
 
     return (
-      <BarChart
-        height={840}
-        width={1410}
-        data={datasetWithBackfill}
-        layout="vertical"
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis
-          type="number"
-          dataKey="day"
-          domain={[0, maxBarHeight ?? 1]}
-        />
-        <YAxis
-          type="category"
-          dataKey="day"
-          width={150}
-          tickFormatter={day => mode === 'data_center_year_code_day_serial' ? selectedCenter + selectedFy + "9" + day.toString().padStart(3, "0") + "XXXX" : selectedCenter + selectedFy + day.toString().padStart(3, "0") + "5XXXX"}
-          domain={[(exisitDays.min() ?? 0) - 1, (exisitDays.max() ?? 1) + 1]}
-          tick={{ fontSize: "6" }}
-          interval={0}
-          allowDecimals={true}
-          ticks={exisitDays.toArray()}
-        />
-        <Tooltip
-          offset={100}
-          content={CustomTooltip}
-          itemSorter={(a) =>
-            -existStatus.indexOf(nullthrows(a.dataKey) as string)
-          }
-        />
-        {existStatus.toArray().map((s, ind) => (
-          <Bar
-            key={ind}
-            isAnimationActive={false}
-            dataKey={s}
-            stackId="a"
-            fill={getColor(s)}
+      <ResponsiveContainer width="90%" height={800}>
+        <BarChart
+          data={datasetWithBackfill}
+          layout="vertical"
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis
+            type="number"
+            dataKey="day"
+            domain={[0, maxBarHeight ?? 1]}
           />
-        ))}
-      </BarChart>
+          <YAxis
+            type="category"
+            dataKey="day"
+            width={150}
+            tickFormatter={day => mode === 'data_center_year_code_day_serial' ? selectedCenter + selectedFy + "9" + day.toString().padStart(3, "0") + "XXXX" : selectedCenter + selectedFy + day.toString().padStart(3, "0") + "5XXXX"}
+            domain={[(exisitDays.min() ?? 0) - 1, (exisitDays.max() ?? 1) + 1]}
+            tick={{ fontSize: "6" }}
+            interval={0}
+            allowDecimals={true}
+            ticks={exisitDays.toArray()}
+          />
+          <Tooltip
+            offset={100}
+            content={CustomTooltip}
+            itemSorter={(a) =>
+              -existStatus.indexOf(nullthrows(a.dataKey) as string)
+            }
+          />
+          {existStatus.toArray().map((s, ind) => (
+            <Bar
+              key={ind}
+              isAnimationActive={false}
+              dataKey={s}
+              stackId="a"
+              fill={getColor(s)}
+            />
+          ))}
+        </BarChart>
+      </ResponsiveContainer>
     );
   }, [datasetWithBackfill, maxBarHeight, exisitDays, existStatus, todayCount, previousDayCount, mode, selectedCenter]);
 
