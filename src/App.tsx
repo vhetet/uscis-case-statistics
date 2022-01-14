@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import ColorHash from "color-hash";
 import Immutable from "immutable";
 import nullthrows from "nullthrows";
@@ -64,6 +66,8 @@ const App: React.FC<{}> = () => {
   const [caseData, setCaseData] = useState<{ [key: string]: { [day: string]: number; }; }>({});
   const [transitioningData, setTransitioningData] = useState<{ [day: string]: { [index: string]: number; }; }>({});
 
+  const [range, setRange] = useState<number[]>([0,0]);
+  const [rangeMax, setRangeMax] = useState<number[]>([0,200]);
 
   const setSearchParam = (key: string, value: string) => {
     const url = new URL(window.location.href);
@@ -281,6 +285,22 @@ const App: React.FC<{}> = () => {
     [exisitDays, dataset]
   );
 
+  const numberDays = useMemo(
+    () => {
+      setRangeMax([0, datasetWithBackfill.length])
+      range[1] === 0 && setRange([0, datasetWithBackfill.length])
+    }, [datasetWithBackfill]
+  );
+
+  const datasetWithBackfillFilter = useMemo(() => {
+    console.log(range);
+    // if(range[0] < range[1]) {
+    //   return datasetWithBackfill.slice(range[0], range[1]);
+    // } else {
+      return datasetWithBackfill
+    // }
+  }, [datasetWithBackfill, range]);
+
   const totalCountToday: Map<String, number> = new Map();
   for (const cnt of datasetWithBackfill) {
     for (const [k, v] of Object.entries(cnt)) {
@@ -344,7 +364,7 @@ const App: React.FC<{}> = () => {
     [todayCount]
   );
 
-  const barChart = useMemo(() => {
+  const barChart = useMemo(() => { // it's not rerendering. I need to lookup what useMeno does for components because I feel like it's the reason the chart isn't rerendering
     const CustomTooltip: ContentRenderer<TooltipProps> = ({
       payload,
       label,
@@ -382,10 +402,12 @@ const App: React.FC<{}> = () => {
       );
     };
 
+    console.log(datasetWithBackfillFilter.length)
+
     return (
       <ResponsiveContainer width="90%" height={800}>
         <BarChart
-          data={datasetWithBackfill}
+          data={datasetWithBackfillFilter}
           layout="vertical"
         >
           <CartesianGrid strokeDasharray="3 3" />
@@ -424,7 +446,7 @@ const App: React.FC<{}> = () => {
         </BarChart>
       </ResponsiveContainer>
     );
-  }, [datasetWithBackfill, maxBarHeight, exisitDays, existStatus, todayCount, previousDayCount, mode, selectedCenter]);
+  }, [datasetWithBackfillFilter, maxBarHeight, exisitDays, existStatus, todayCount, previousDayCount, mode, selectedCenter, range]);
 
   const introduction = (
     <div>
@@ -524,12 +546,31 @@ const App: React.FC<{}> = () => {
     </FormControl>
   );
 
+  // const createArray = (min: number, max: number) => Array(max - min).fill(min).map((value, i) => value + i);
+
+  const rangeSelector = rangeMax.length === 2 && (
+    <div>
+      <FormControl fullWidth={true} component="fieldset">
+        <Slider
+          min={rangeMax[0]}
+          max={rangeMax[1]}
+          value={range}
+          onChange={(_, newVal) => {
+            setRange(newVal as number[])
+          }}
+          valueLabelDisplay="auto"
+        ></Slider>
+      </FormControl>
+    </div>
+  );
+
 
   return (
     <div>
       {introduction}
       {formTypeSelector}
       {centerSelector}
+      {rangeSelector}
       {updateDayPicker}
       {barChart}
       {updateDayPicker}
