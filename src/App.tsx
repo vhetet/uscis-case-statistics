@@ -6,7 +6,6 @@ import nullthrows from "nullthrows";
 import React, { useEffect, useState, useMemo } from "react";
 import * as lodash from "lodash";
 
-
 import {
   Bar,
   BarChart,
@@ -25,7 +24,6 @@ import Grid from "@material-ui/core/Grid";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import Slider from "@material-ui/core/Slider";
-
 
 type FY = "20" | "21";
 const statusMap = new Map([
@@ -57,17 +55,23 @@ const App: React.FC<{}> = () => {
     new URL(window.location.href).searchParams.get("form") ?? "I-765";
   const selectedCenter =
     new URL(window.location.href).searchParams.get("center") ?? "LIN";
-  const mode = new URL(window.location.href).searchParams.get("mode") ?? "data_center_year_code_day_serial";
+  const mode =
+    new URL(window.location.href).searchParams.get("mode") ??
+    "data_center_year_code_day_serial";
   const selectedFy = "21";
 
   const [selectedUpdateDay, setSelectedUpdateDay] = useState<string | null>(
     null
   );
-  const [caseData, setCaseData] = useState<{ [key: string]: { [day: string]: number; }; }>({});
-  const [transitioningData, setTransitioningData] = useState<{ [day: string]: { [index: string]: number; }; }>({});
+  const [caseData, setCaseData] = useState<{
+    [key: string]: { [day: string]: number };
+  }>({});
+  const [transitioningData, setTransitioningData] = useState<{
+    [day: string]: { [index: string]: number };
+  }>({});
 
-  const [range, setRange] = useState<number[]>([0,0]);
-  const [rangeMax, setRangeMax] = useState<number[]>([0,200]);
+  const [range, setRange] = useState<number[]>([0, 0]);
+  const [rangeMax, setRangeMax] = useState<number[]>([0, 200]);
 
   const setSearchParam = (key: string, value: string) => {
     const url = new URL(window.location.href);
@@ -93,13 +97,28 @@ const App: React.FC<{}> = () => {
       if (!url.searchParams.get("mode") && url.searchParams.get("form")) {
         setSearchParam("mode", "data_center_year_day_code_serial");
       }
-      if (url.searchParams.get("form") && url.searchParams.get("center") && url.searchParams.get("mode")) {
+      if (
+        url.searchParams.get("form") &&
+        url.searchParams.get("center") &&
+        url.searchParams.get("mode")
+      ) {
         if (url.searchParams.get("t_delta") === "7") {
-          setTransitioningData((await (await import('./scraper/transitioning_7.json')).default));
+          setTransitioningData(
+            await (
+              await import("./scraper/transitioning_7.json")
+            ).default
+          );
         } else {
-          setTransitioningData((await (await import('./scraper/transitioning_1.json')).default));
+          setTransitioningData(
+            await (
+              await import("./scraper/transitioning_1.json")
+            ).default
+          );
         }
-        setCaseData(((await import('./scraper/data_center_year_day_code_serial_21.json')).default));
+        setCaseData(
+          (await import("./scraper/data_center_year_day_code_serial_21.json"))
+            .default
+        );
       }
     })();
   }, [mode, url.searchParams]);
@@ -148,7 +167,6 @@ const App: React.FC<{}> = () => {
       .toList();
   }, [caseData]);
 
-
   const selectedEntriesAllDate = useMemo(
     () =>
       entries.filter(
@@ -167,7 +185,6 @@ const App: React.FC<{}> = () => {
     [selectedEntriesAllDate]
   );
 
-
   const latestUpdateDay = useMemo(
     () => selectedEntriesAllDate.map((e) => Number.parseInt(e.updateDay)).max(),
     [selectedEntriesAllDate]
@@ -182,14 +199,22 @@ const App: React.FC<{}> = () => {
     [selectedEntriesAllDate, selectedUpdateDay, latestUpdateDay]
   );
 
-  const formTypes = useMemo(() => entries.map((e) => e.form).toSet()
-    .filter(e => e && e.length > 0), [
-    entries,
-  ]);
-  const centerNames = useMemo(() => entries.map((e) => e.center).toSet()
-    .filter(e => e && e.length > 0 && e !== 'default'), [
-    entries,
-  ]);
+  const formTypes = useMemo(
+    () =>
+      entries
+        .map((e) => e.form)
+        .toSet()
+        .filter((e) => e && e.length > 0),
+    [entries]
+  );
+  const centerNames = useMemo(
+    () =>
+      entries
+        .map((e) => e.center)
+        .toSet()
+        .filter((e) => e && e.length > 0 && e !== "default"),
+    [entries]
+  );
 
   const statusCount = useMemo(
     () => selectedEntriesAllDate.countBy((x) => x.status),
@@ -242,7 +267,11 @@ const App: React.FC<{}> = () => {
         .filter(
           (v) =>
             v.updateDay ===
-            (Number.parseInt((selectedUpdateDay ?? latestUpdateDay)?.toString() ?? "0") - 1).toString()
+            (
+              Number.parseInt(
+                (selectedUpdateDay ?? latestUpdateDay)?.toString() ?? "0"
+              ) - 1
+            ).toString()
         )
         .groupBy((v) => v.day)
         .map((v) =>
@@ -285,86 +314,121 @@ const App: React.FC<{}> = () => {
     [exisitDays, dataset]
   );
 
-  const numberDays = useMemo(
-    () => {
-      setRangeMax([0, datasetWithBackfill.length])
-      range[1] === 0 && setRange([0, datasetWithBackfill.length])
-    }, [datasetWithBackfill]
-  );
+  const numberDays = useMemo(() => {
+    setRangeMax([0, datasetWithBackfill.length]);
+    range[1] === 0 && setRange([0, datasetWithBackfill.length]);
+  }, [datasetWithBackfill]);
 
   const datasetWithBackfillFilter = useMemo(() => {
     console.log(range);
     // if(range[0] < range[1]) {
     //   return datasetWithBackfill.slice(range[0], range[1]);
     // } else {
-      return datasetWithBackfill
+    return datasetWithBackfill;
     // }
   }, [datasetWithBackfill, range]);
 
   const totalCountToday: Map<String, number> = new Map();
   for (const cnt of datasetWithBackfill) {
     for (const [k, v] of Object.entries(cnt)) {
-      if (k === 'day') continue;
-      totalCountToday.set(k, Number.parseInt(v) + (totalCountToday.get(k) ?? 0));
+      if (k === "day") continue;
+      totalCountToday.set(
+        k,
+        Number.parseInt(v) + (totalCountToday.get(k) ?? 0)
+      );
     }
   }
 
   const all = false;
-  const processedTransitioningData = Immutable.List(all ?
-    Object.values(transitioningData).map(v => Object.entries(v)).flat() :
-    Object.entries(transitioningData[(selectedUpdateDay ?? latestUpdateDay) ?? ""] ?? {}))
+  const processedTransitioningData = Immutable.List(
+    all
+      ? Object.values(transitioningData)
+          .map((v) => Object.entries(v))
+          .flat()
+      : Object.entries(
+          transitioningData[selectedUpdateDay ?? latestUpdateDay ?? ""] ?? {}
+        )
+  )
     .map(([key, count]) => {
       const [format, form, center, year, code, day, from, to] = key.split("|");
       return { format, form, center, year, code, day, from, to, count };
     })
-    .filter(trans => trans.year === selectedFy && trans.center === selectedCenter && trans.form === selectedForm && ("data_" + trans.format) === url.searchParams.get("mode"))
-    .groupBy(trans => trans.from + trans.to)
+    .filter(
+      (trans) =>
+        trans.year === selectedFy &&
+        trans.center === selectedCenter &&
+        trans.form === selectedForm &&
+        "data_" + trans.format === url.searchParams.get("mode")
+    )
+    .groupBy((trans) => trans.from + trans.to)
     .toMap()
-    .map(v => v.valueSeq().toList())
+    .map((v) => v.valueSeq().toList())
     .valueSeq()
     .toList()
-    .map(trans => {
+    .map((trans) => {
       return {
         from: trans.get(0)!.from,
         to: trans.get(0)!.to,
-        count: lodash.sumBy(trans.toArray(), t => t.count)
+        count: lodash.sumBy(trans.toArray(), (t) => t.count),
       };
     })
     .toArray();
 
-  const Transitioning = <div>
-    {processedTransitioningData.sort((a, b) => b.count - a.count)
-      .map((trans, i) => {
-        return <div key={i}>
-          <div style={{ color: getColor(trans.from), display: 'inline' }}>{trans.from}</div>
-          <b>{" => "}</b>
-          <div style={{ color: getColor(trans.to), display: 'inline' }}>{trans.to}</div>
-          <b>{" : " + trans.count}</b></div>;
-      })}
-  </div>;
-
+  const Transitioning = (
+    <div>
+      {processedTransitioningData
+        .sort((a, b) => b.count - a.count)
+        .map((trans, i) => {
+          return (
+            <div key={i}>
+              <div style={{ color: getColor(trans.from), display: "inline" }}>
+                {trans.from}
+              </div>
+              <b>{" => "}</b>
+              <div style={{ color: getColor(trans.to), display: "inline" }}>
+                {trans.to}
+              </div>
+              <b>{" : " + trans.count}</b>
+            </div>
+          );
+        })}
+    </div>
+  );
 
   const sumToday = lodash.sum(Array.from(totalCountToday.values()));
-  const TotalCountToday = <div>
-    <h3>Total for {selectedCenter} and {selectedForm} on your selected date</h3>
-    <h4>Transitioning</h4>
-    {Transitioning}
-    <br />
-    <h4>Total Counts:</h4>
-    {Array.from(totalCountToday).sort((a, b) => b[1] - a[1]).map(([k, v], i) => <div key={i} style={{ color: getColor(k as string) }}>
-      {k} : {v}, {(v * 100 / sumToday).toFixed(2)}%
-    </div>)}
-    <div><b>Total: {sumToday}</b></div>
-  </div>;
-
+  const TotalCountToday = (
+    <div>
+      <h3>
+        Total for {selectedCenter} and {selectedForm} on your selected date
+      </h3>
+      <h4>Transitioning</h4>
+      {Transitioning}
+      <br />
+      <h4>Total Counts:</h4>
+      {Array.from(totalCountToday)
+        .sort((a, b) => b[1] - a[1])
+        .map(([k, v], i) => (
+          <div key={i} style={{ color: getColor(k as string) }}>
+            {k} : {v}, {((v * 100) / sumToday).toFixed(2)}%
+          </div>
+        ))}
+      <div>
+        <b>Total: {sumToday}</b>
+      </div>
+    </div>
+  );
 
   const maxBarHeight = useMemo(
     () =>
-      todayCount.valueSeq().map(v => lodash.sum(v.valueSeq().toArray())).max(),
+      todayCount
+        .valueSeq()
+        .map((v) => lodash.sum(v.valueSeq().toArray()))
+        .max(),
     [todayCount]
   );
 
-  const barChart = useMemo(() => { // it's not rerendering. I need to lookup what useMeno does for components because I feel like it's the reason the chart isn't rerendering
+  const barChart = useMemo(() => {
+    // it's not rerendering. I need to lookup what useMeno does for components because I feel like it's the reason the chart isn't rerendering
     const CustomTooltip: ContentRenderer<TooltipProps> = ({
       payload,
       label,
@@ -386,41 +450,46 @@ const App: React.FC<{}> = () => {
               .get(label as string)
               ?.get(p.dataKey as string) ?? 0) as number;
             return (
-              <p key={ind} style={{ color: p.fill, marginBottom: "3px" }}>{`${p.dataKey
-                }: ${p.value} of ${todayTotal} (${(
-                  (100 * (p.value as number)) /
-                  todayTotal
-                ).toFixed(
-                  2
-                )}%), Previous day: ${prevDay} of ${prevdayTotal},  (${(
-                  (100 * prevDay) /
-                  prevdayTotal
-                ).toFixed(2)}%)`}</p>
+              <p key={ind} style={{ color: p.fill, marginBottom: "3px" }}>{`${
+                p.dataKey
+              }: ${p.value} of ${todayTotal} (${(
+                (100 * (p.value as number)) /
+                todayTotal
+              ).toFixed(
+                2
+              )}%), Previous day: ${prevDay} of ${prevdayTotal},  (${(
+                (100 * prevDay) /
+                prevdayTotal
+              ).toFixed(2)}%)`}</p>
             );
           })}
         </div>
       );
     };
 
-    console.log(datasetWithBackfillFilter.length)
+    console.log(datasetWithBackfillFilter.length);
 
     return (
       <ResponsiveContainer width="90%" height={800}>
-        <BarChart
-          data={datasetWithBackfillFilter}
-          layout="vertical"
-        >
+        <BarChart data={datasetWithBackfillFilter} layout="vertical">
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis
-            type="number"
-            dataKey="day"
-            domain={[0, maxBarHeight ?? 1]}
-          />
+          <XAxis type="number" dataKey="day" domain={[0, maxBarHeight ?? 1]} />
           <YAxis
             type="category"
             dataKey="day"
             width={150}
-            tickFormatter={day => mode === 'data_center_year_code_day_serial' ? selectedCenter + selectedFy + "9" + day.toString().padStart(3, "0") + "XXXX" : selectedCenter + selectedFy + day.toString().padStart(3, "0") + "5XXXX"}
+            tickFormatter={(day) =>
+              mode === "data_center_year_code_day_serial"
+                ? selectedCenter +
+                  selectedFy +
+                  "9" +
+                  day.toString().padStart(3, "0") +
+                  "XXXX"
+                : selectedCenter +
+                  selectedFy +
+                  day.toString().padStart(3, "0") +
+                  "5XXXX"
+            }
             domain={[(exisitDays.min() ?? 0) - 1, (exisitDays.max() ?? 1) + 1]}
             tick={{ fontSize: "6" }}
             interval={0}
@@ -446,7 +515,17 @@ const App: React.FC<{}> = () => {
         </BarChart>
       </ResponsiveContainer>
     );
-  }, [datasetWithBackfillFilter, maxBarHeight, exisitDays, existStatus, todayCount, previousDayCount, mode, selectedCenter, range]);
+  }, [
+    datasetWithBackfillFilter,
+    maxBarHeight,
+    exisitDays,
+    existStatus,
+    todayCount,
+    previousDayCount,
+    mode,
+    selectedCenter,
+    range,
+  ]);
 
   const introduction = (
     <div>
@@ -456,13 +535,12 @@ const App: React.FC<{}> = () => {
         <strong>{selectedCenter}</strong>,
         <br />
         Case number mode: <strong>{mode}</strong>
-        <br /> Last Update for this form and
-        location:
+        <br /> Last Update for this form and location:
         <strong>
           {latestUpdateDay
             ? new Date(
-              86400000 * latestUpdateDay + 3600 * 1000 * 7
-            ).toDateString()
+                86400000 * latestUpdateDay + 3600 * 1000 * 7
+              ).toDateString()
             : "Not Exist currently"}
         </strong>
       </p>
@@ -494,7 +572,6 @@ const App: React.FC<{}> = () => {
     </Grid>
   ) : null;
 
-
   const formTypeSelector = (
     <FormControl fullWidth={true} component="fieldset">
       <RadioGroup
@@ -518,8 +595,6 @@ const App: React.FC<{}> = () => {
       </RadioGroup>
     </FormControl>
   );
-
-
 
   const centerSelector = (
     <FormControl fullWidth={true} component="fieldset">
@@ -556,14 +631,13 @@ const App: React.FC<{}> = () => {
           max={rangeMax[1]}
           value={range}
           onChange={(_, newVal) => {
-            setRange(newVal as number[])
+            setRange(newVal as number[]);
           }}
           valueLabelDisplay="auto"
         ></Slider>
       </FormControl>
     </div>
   );
-
 
   return (
     <div>
