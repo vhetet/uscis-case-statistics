@@ -172,7 +172,6 @@ const App: React.FC<{}> = () => {
   }, [caseData]);
 
   const selectedEntriesAllDate = useMemo(() => {
-    console.log("selectedEntriesAllDate");
     return entries.filter(
       (e) => e.form === selectedForm && e.center === selectedCenter
     );
@@ -322,7 +321,6 @@ const App: React.FC<{}> = () => {
   }, [datasetWithBackfill]);
 
   const datasetWithBackfillFilter = useMemo(() => {
-    console.log({ range });
     if (range[0] < range[1]) {
       return datasetWithBackfill.slice(range[0], range[1]);
     } else {
@@ -468,8 +466,6 @@ const App: React.FC<{}> = () => {
         </div>
       );
     };
-
-    console.log(datasetWithBackfillFilter.length);
 
     return (
       <ResponsiveContainer width="90%" height={800}>
