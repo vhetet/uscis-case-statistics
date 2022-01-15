@@ -51,10 +51,12 @@ function getColor(s: string): string {
 }
 
 const App: React.FC<{}> = () => {
-  const selectedForm =
-    new URL(window.location.href).searchParams.get("form") ?? "I-765";
-  const selectedCenter =
-    new URL(window.location.href).searchParams.get("center") ?? "LIN";
+  const [selectedForm, setSelectedForm] = useState(
+    new URL(window.location.href).searchParams.get("form") ?? "I-765"
+  );
+  const [selectedCenter, setSelectedCenter] = useState(
+    new URL(window.location.href).searchParams.get("center") ?? "LIN"
+  );
   const mode =
     new URL(window.location.href).searchParams.get("mode") ??
     "data_center_year_code_day_serial";
@@ -69,7 +71,6 @@ const App: React.FC<{}> = () => {
   const [transitioningData, setTransitioningData] = useState<{
     [day: string]: { [index: string]: number };
   }>({});
-
   const [range, setRange] = useState<number[]>([0, 0]);
   const [rangeMax, setRangeMax] = useState<number[]>([0, 200]);
 
@@ -78,10 +79,36 @@ const App: React.FC<{}> = () => {
     const searchParams = url.searchParams;
     searchParams.set(key, value);
     url.search = searchParams.toString();
-    window.location.href = url.toString();
+    // window.location.href = url.toString();
+    window.history.pushState({}, "", url.toString());
+    if (key === "form") {
+      setSelectedForm(value);
+    }
+    if (key === "center") {
+      setSelectedCenter(value);
+    }
   };
 
   const url = new URL(window.location.href);
+
+  // instead of refetching the entire list everytime, I could fetch once on first load and then store the data for each form, I would potentially have to refetch on FY change but I don't care about this for now
+  // for the first load I have useEffect(() => {}, []);
+  // it fetch the data and formats it, one var per form type and center.
+
+  useEffect(() => {
+    (async () => {
+      setCaseData(
+        (await import("./scraper/data_center_year_day_code_serial_21.json"))
+          .default
+      );
+      // setTransitioningData((await (await import('./scraper/transitioning_7.json')).default));
+      setTransitioningData(
+        await (
+          await import("./scraper/transitioning_1.json")
+        ).default
+      );
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -96,29 +123,6 @@ const App: React.FC<{}> = () => {
       }
       if (!url.searchParams.get("mode") && url.searchParams.get("form")) {
         setSearchParam("mode", "data_center_year_day_code_serial");
-      }
-      if (
-        url.searchParams.get("form") &&
-        url.searchParams.get("center") &&
-        url.searchParams.get("mode")
-      ) {
-        if (url.searchParams.get("t_delta") === "7") {
-          setTransitioningData(
-            await (
-              await import("./scraper/transitioning_7.json")
-            ).default
-          );
-        } else {
-          setTransitioningData(
-            await (
-              await import("./scraper/transitioning_1.json")
-            ).default
-          );
-        }
-        setCaseData(
-          (await import("./scraper/data_center_year_day_code_serial_21.json"))
-            .default
-        );
       }
     })();
   }, [mode, url.searchParams]);
@@ -167,13 +171,12 @@ const App: React.FC<{}> = () => {
       .toList();
   }, [caseData]);
 
-  const selectedEntriesAllDate = useMemo(
-    () =>
-      entries.filter(
-        (e) => e.form === selectedForm && e.center === selectedCenter
-      ),
-    [entries, selectedForm, selectedCenter]
-  );
+  const selectedEntriesAllDate = useMemo(() => {
+    console.log("selectedEntriesAllDate");
+    return entries.filter(
+      (e) => e.form === selectedForm && e.center === selectedCenter
+    );
+  }, [entries, selectedForm, selectedCenter]);
 
   const availableUpdateDays = useMemo(
     () =>
@@ -309,8 +312,7 @@ const App: React.FC<{}> = () => {
               day: day.toString(),
             }
         )
-        .toArray()
-        .slice(200, 240),
+        .toArray(),
     [exisitDays, dataset]
   );
 
@@ -320,12 +322,12 @@ const App: React.FC<{}> = () => {
   }, [datasetWithBackfill]);
 
   const datasetWithBackfillFilter = useMemo(() => {
-    console.log(range);
-    // if(range[0] < range[1]) {
-    //   return datasetWithBackfill.slice(range[0], range[1]);
-    // } else {
-    return datasetWithBackfill;
-    // }
+    console.log({ range });
+    if (range[0] < range[1]) {
+      return datasetWithBackfill.slice(range[0], range[1]);
+    } else {
+      return datasetWithBackfill;
+    }
   }, [datasetWithBackfill, range]);
 
   const totalCountToday: Map<String, number> = new Map();
