@@ -375,12 +375,22 @@ const App: React.FC<{}> = () => {
     .toArray();
 
   const Transitioning = (
-    <div>
+    <div
+      style={{
+        display: "grid",
+      }}
+    >
       {processedTransitioningData
         .sort((a, b) => b.count - a.count)
         .map((trans, i) => {
           return (
-            <div key={i}>
+            <div
+              key={i}
+              style={{
+                display: "inline-grid",
+                "grid-template-columns": "2fr 1fr 2fr 1fr",
+              }}
+            >
               <div style={{ color: getColor(trans.from), display: "inline" }}>
                 {trans.from}
               </div>
@@ -405,13 +415,24 @@ const App: React.FC<{}> = () => {
       {Transitioning}
       <br />
       <h4>Total Counts:</h4>
-      {Array.from(totalCountToday)
-        .sort((a, b) => b[1] - a[1])
-        .map(([k, v], i) => (
-          <div key={i} style={{ color: getColor(k as string) }}>
-            {k} : {v}, {((v * 100) / sumToday).toFixed(2)}%
-          </div>
-        ))}
+      <div style={{ display: "grid", "grid-template-columns": "auto" }}>
+        {Array.from(totalCountToday)
+          .sort((a, b) => b[1] - a[1])
+          .map(([k, v], i) => (
+            <div
+              key={i}
+              style={{
+                color: getColor(k as string),
+                display: "grid",
+                "grid-template-columns": "3fr 1fr 1fr",
+              }}
+            >
+              <span>{k} : </span>
+              <span>{v} </span>
+              <span>{((v * 100) / sumToday).toFixed(2)}%</span>
+            </div>
+          ))}
+      </div>
       <div>
         <b>Total: {sumToday}</b>
       </div>
